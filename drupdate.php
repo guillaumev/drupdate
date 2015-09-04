@@ -7,9 +7,6 @@ require_once(__DIR__ . '/vendor/autoload.php');
 $client = new GitHubClient();
 $client->setCredentials($conf['username'], $conf['password']);
 
-$url = 'git@github.com:guillaumev/gvj.git';
-$branch = 'master';
-
 /**
  * Forks a repository
  *
@@ -126,7 +123,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
         }
       }
       else {
-        // We are just update drupal core
+        // We are just updating drupal core
         $modules = 'drupal';
         _drupdate_commit($owner, $repo, $branch, $modules, $options);
       }
