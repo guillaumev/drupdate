@@ -35,7 +35,7 @@ function drupdate_fork($owner, $repo) {
  */
 function _drupdate_clone($owner, $repo, $branch) {
   global $client;
-  $cmd = "git clone git@github.com:'.$owner.'/'.$repo.' repository";
+  $cmd = 'git clone git@github.com:'.$owner.'/'.$repo.' repository';
   exec($cmd, $output, $return);
   if ($return == 0) {
     // Find out if it's a fork
@@ -122,13 +122,13 @@ function drupdate($owner, $repo, $branch, $options = array()) {
         $cmd = "cd repository; drush -y dl $modules";
         exec($cmd, $output, $return);
         if ($return == 0) {
-          _drupdate_commit($modules, $options);
+          _drupdate_commit($owner, $repo, $branch, $modules, $options);
         }
       }
       else {
         // We are just update drupal core
         $modules = 'drupal';
-        _drupdate_commit($modules, $options);
+        _drupdate_commit($owner, $repo, $branch, $modules, $options);
       }
     }
         
@@ -136,7 +136,8 @@ function drupdate($owner, $repo, $branch, $options = array()) {
   }
 }
 
-function _drupdate_commit($modules, $options) {
+function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
+  global $client;
   // Step 5: commit the changes in an update branch
   $date = date('Y-m-d');
   $cmd = 'cd repository; git checkout -b update-' . $date . '; git add --all .; git commit -am "Updated ' . $modules.'"';
@@ -145,12 +146,22 @@ function _drupdate_commit($modules, $options) {
     // push the updated modules to the branch
     $cmd = 'cd repository; git push origin update-' . $date;
     exec($cmd, $output, $return);
-    // TODO: create the pull request
+    // create the pull request
     $pr_data = array();
+    $pr_data['owner'] = $owner;
+    $pr_data['repo'] = $repo;
     $pr_data['title'] = 'Drupal module updates '.$date;
-    $pr_data['head'] = ''; // TODO
-    $pr_data['base'] = ''; // TODO
-    $pr_data['body'] = 'Updated '.$modules;
+    $pr_data['head'] = 'update-'.$date;
+    // Find out if it's a fork
+    $repo_object = $client->repos->get($owner, $repo);
+    if ($repo_object->getFork()) {
+      $parent = $repo_object->getParent();
+      $pr_data['owner'] = $parent->getOwner()->getLogin();
+      $pr_data['head'] = $owner.':update-'.$date;
+    }
+    $pr_data['base'] = $branch;
+    $pr_data['body'] = 'Updated '.$modules;
+    $client->pulls->createPullRequest($pr_data['owner'], $pr_data['repo'], $pr_data['title'], $pr_data['head'], $pr_data['base'], $pr_data['body']);
     if ($return == 0 && isset($options['merge']) && $options['merge'] == true) {
       // Merge the update branch back into the main one
       $cmd = 'git checkout '.$branch.'; git merge update-' . $date.'; git push origin '.$branch;
@@ -161,4 +172,4 @@ function _drupdate_commit($modules, $options) {
 
 $options = array('ignore' => array('bootstrap'), 'merge' => false);
 
-drupdate_clone('guillaumev', 'Spoon-Knife', 'master');
+drupdate('guillaumev', 'gvj', 'master', $options);
