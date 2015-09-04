@@ -1,0 +1,7 @@
+{
+	"name": "guillaumev/drupdate",
+	"description": "Update your drupal platform automatically",
+	"require": {
+		"tan-tan-kanarek/github-php-client": "dev-master"
+	}
+}

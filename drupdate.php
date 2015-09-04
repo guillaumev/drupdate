@@ -2,7 +2,7 @@
 
 require_once('./conf.php');
 require_once('./lib.php');
-require_once(__DIR__ . '/github-php-client/client/GitHubClient.php');
+require_once(__DIR__ . '/vendor/autoload.php');
 
 $client = new GitHubClient();
 $client->setCredentials($conf['username'], $conf['password']);
