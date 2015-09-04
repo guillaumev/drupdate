@@ -170,6 +170,4 @@ function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
   }
 }
 
-$options = array('ignore' => array('bootstrap'), 'merge' => false);
-
-drupdate('guillaumev', 'gvj', 'master', $options);
+drupdate($conf['owner'], $conf['repo'], $conf['branch'], $conf['options']);
