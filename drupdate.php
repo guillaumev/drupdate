@@ -109,7 +109,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
           unset($to_update[$dkey]);
           // Update drupal core
           // Download in another folder
-          $cmd = "drush dl drupal -y --destination=".CORE_DIR." --drupal-project-rename";
+          $cmd = 'drush dl drupal -y --destination='.CORE_DIR.' --drupal-project-rename';
           exec($cmd, $output, $return);
           if ($return == 0) {
             $cmd = 'cp -R '.CORE_DIR.'/drupal/* '.REPOSITORY_DIR;
@@ -119,7 +119,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
       }
       if (!empty($to_update)) {
         $modules = implode(' ', $to_update);
-        $cmd = 'cd '.REPOSITORY_DIR.'; drush -y dl $modules';
+        $cmd = 'cd '.REPOSITORY_DIR.'; drush -y dl '.$modules;
         exec($cmd, $output, $return);
         if ($return == 0) {
           _drupdate_commit($owner, $repo, $branch, $modules, $options);
@@ -139,7 +139,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
   }
   if (is_dir(CORE_DIR)) {
     rrmdir(CORE_DIR);
-  } 
+  }
 }
 
 function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
