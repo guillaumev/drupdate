@@ -4,6 +4,9 @@ require_once('./conf.php');
 require_once('./lib.php');
 require_once(__DIR__ . '/vendor/autoload.php');
 
+define('REPOSITORY_DIR', 'repository');
+define('CORE_DIR', 'core');
+
 $client = new GitHubClient();
 $client->setCredentials($conf['username'], $conf['password']);
 
@@ -32,7 +35,7 @@ function drupdate_fork($owner, $repo) {
  */
 function _drupdate_clone($owner, $repo, $branch) {
   global $client;
-  $cmd = 'git clone git@github.com:'.$owner.'/'.$repo.' repository';
+  $cmd = 'git clone git@github.com:'.$owner.'/'.$repo.' '.REPOSITORY_DIR;
   exec($cmd, $output, $return);
   if ($return == 0) {
     // Find out if it's a fork
@@ -106,17 +109,17 @@ function drupdate($owner, $repo, $branch, $options = array()) {
           unset($to_update[$dkey]);
           // Update drupal core
           // Download in another folder
-          $cmd = "drush dl drupal -y --destination=core --drupal-project-rename";
+          $cmd = "drush dl drupal -y --destination=".CORE_DIR." --drupal-project-rename";
           exec($cmd, $output, $return);
           if ($return == 0) {
-            $cmd = "cp -R core/drupal/* repository";
+            $cmd = 'cp -R '.CORE_DIR.'/drupal/* '.REPOSITORY_DIR;
             exec($cmd, $output, $return);
           }
         }
       }
       if (!empty($to_update)) {
         $modules = implode(' ', $to_update);
-        $cmd = "cd repository; drush -y dl $modules";
+        $cmd = 'cd '.REPOSITORY_DIR.'; drush -y dl $modules';
         exec($cmd, $output, $return);
         if ($return == 0) {
           _drupdate_commit($owner, $repo, $branch, $modules, $options);
@@ -128,20 +131,26 @@ function drupdate($owner, $repo, $branch, $options = array()) {
         _drupdate_commit($owner, $repo, $branch, $modules, $options);
       }
     }
-        
-    
   }
+
+  // Step 5: clean up
+  if (is_dir(REPOSITORY_DIR)) {
+    rrmdir(REPOSITORY_DIR);
+  }
+  if (is_dir(CORE_DIR)) {
+    rrmdir(CORE_DIR);
+  } 
 }
 
 function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
   global $client;
   // Step 5: commit the changes in an update branch
   $date = date('Y-m-d');
-  $cmd = 'cd repository; git checkout -b update-' . $date . '; git add --all .; git commit -am "Updated ' . $modules.'"';
+  $cmd = 'cd '.REPOSITORY_DIR.'; git checkout -b update-' . $date . '; git add --all .; git commit -am "Updated ' . $modules.'"';
   exec($cmd, $output, $return);
   if ($return == 0) {
     // push the updated modules to the branch
-    $cmd = 'cd repository; git push origin update-' . $date;
+    $cmd = 'cd '.REPOSITORY_DIR.'; git push origin update-' . $date;
     exec($cmd, $output, $return);
     // create the pull request
     $pr_data = array();
