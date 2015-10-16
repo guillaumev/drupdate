@@ -176,4 +176,53 @@ function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
   }
 }
 
-drupdate($conf['owner'], $conf['repo'], $conf['branch'], $conf['options']);
+function drupdate_usage() {
+  echo "Usage: drupdate owner repository branch -Imodules_to_ignore -M\n";
+  echo "-I: list of modules to ignore\n";
+  echo "-M: try to merge pull request automatically\n";
+}
+
+// Build conf
+$short_opts = 'I:M';
+$long_opts = array(
+  'ignore=',
+  'merge='
+);
+if ( realpath($_SERVER['argv'][0]) == __FILE__ ) {
+  $options = Console_Getopt::getOpt($argv,$short_opts,$long_opts);
+}
+else {
+  $options = Console_Getopt::getOpt2($argv,$short_opts,$long_opts);
+}
+if (count($options[1]) != 3) {
+  drupdate_usage();
+  return;
+}
+$error = false;
+$doptions = array();
+if (count($options[0])) {
+  foreach ($options[0] as $opt) {
+    if (!in_array($opt[0], array('I', 'M', 'ignore', 'merge'))) {
+      $error = true;
+    }
+    else {
+      if ($opt[0] == 'I' || $opt[0] == 'ignore') {
+        $doptions['ignore'] = explode(',', $opt[1]);
+      }
+      if ($opt[0] == 'M' || $opt[0] == 'merge') {
+        if ($opt[0] == 'M') {
+          $doptions['merge'] = true;
+        }
+        else {
+          $doptions['merge'] = $opt[1];
+        }
+      }
+    }
+  }
+}
+if ($error) {
+  drupdate_usage();
+  return;
+}
+drupdate($options[1][0], $options[1][1], $options[1][2], $doptions);
+
