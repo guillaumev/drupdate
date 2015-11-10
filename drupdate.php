@@ -177,52 +177,46 @@ function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
 }
 
 function drupdate_usage() {
-  echo "Usage: drupdate owner repository branch -Imodules_to_ignore -M\n";
-  echo "-I: list of modules to ignore\n";
-  echo "-M: try to merge pull request automatically\n";
+  echo "Usage: drupdate -o owner -r repository -b branch -i modules_to_ignore -m\n";
+  echo "-o: github owner\n";
+  echo "-r: github repository name\n";
+  echo "-b: repository branch to use\n";
+  echo "-i: list of modules to ignore\n";
+  echo "-m: try to merge pull request automatically\n";
 }
 
 // Build conf
-$short_opts = 'I:M';
+$short_opts = 'o:r:b:i:m';
 $long_opts = array(
-  'ignore=',
-  'merge='
+  'owner:',
+  'repository:',
+  'branch:',
+  'ignore:',
+  'merge'
 );
-if ( realpath($_SERVER['argv'][0]) == __FILE__ ) {
-  $options = Console_Getopt::getOpt($argv,$short_opts,$long_opts);
+$options = getopt($short_opts, $long_opts);
+
+if ((!isset($options['o']) && !isset($options['owner'])) ||
+  (!isset($options['r']) && !isset($options['repository'])) ||
+  (!isset($options['b']) && !isset($options['branch']) )) {
+  drupdate_usage();
 }
 else {
-  $options = Console_Getopt::getOpt2($argv,$short_opts,$long_opts);
-}
-if (count($options[1]) != 3) {
-  drupdate_usage();
-  return;
-}
-$error = false;
-$doptions = array();
-if (count($options[0])) {
-  foreach ($options[0] as $opt) {
-    if (!in_array($opt[0], array('I', 'M', 'ignore', 'merge'))) {
-      $error = true;
-    }
-    else {
-      if ($opt[0] == 'I' || $opt[0] == 'ignore') {
-        $doptions['ignore'] = explode(',', $opt[1]);
-      }
-      if ($opt[0] == 'M' || $opt[0] == 'merge') {
-        if ($opt[0] == 'M') {
-          $doptions['merge'] = true;
-        }
-        else {
-          $doptions['merge'] = $opt[1];
-        }
-      }
-    }
+  $owner = $options['o'] ? $options['o'] : $options['owner'];
+  $repository = $options['r'] ? $options['r'] : $options['repository'];
+  $branch = $options['b'] ? $options['b'] : $options['branch'];
+  $doptions = array();
+  if (isset($options['i'])) {
+    $doptions['ignore'] = explode(',', $options['i']);
   }
+  if (isset($options['ignore'])) {
+    $doptions['ignore'] = explode(',', $options['ignore']);
+  }
+  $doptions['merge'] = false;
+  if (isset($options['m']) || isset($options['merge'])) {
+    $doptions['merge'] = true;
+  }
+  drupdate($owner, $repository, $branch, $doptions);
 }
-if ($error) {
-  drupdate_usage();
-  return;
-}
-drupdate($options[1][0], $options[1][1], $options[1][2], $doptions);
+
 

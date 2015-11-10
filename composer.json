@@ -2,11 +2,6 @@
 	"name": "guillaumev/drupdate",
 	"description": "Update your drupal platform automatically",
 	"require": {
-		"tan-tan-kanarek/github-php-client": "dev-master",
-		"pear/Console_Getopt": "1.4.1"
-	},
-	"repositories": [{
-		"type": "pear",
-		"url": "http://pear.php.net"
-	}]
+		"tan-tan-kanarek/github-php-client": "dev-master"
+	}
 }
