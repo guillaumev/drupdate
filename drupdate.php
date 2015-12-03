@@ -29,8 +29,14 @@ function rrmdir($dir) {
 }
 
 
-$client = new GitHubClient();
-$client->setCredentials($conf['username'], $conf['password']);
+function _drupdate_github() {
+  static $client;
+  if (!isset($client)) {
+    $client = new GitHubClient();
+    $client->setCredentials(DRUPDATE_GITHUB_USER, DRUPDATE_GITHUB_PASSWORD);
+  }
+  return $client;
+}
 
 /**
  * Forks a repository
@@ -41,7 +47,7 @@ $client->setCredentials($conf['username'], $conf['password']);
  *   The repository to be forked
  */
 function drupdate_fork($owner, $repo) {
-  global $client;
+  $client = _drupdate_github();
   return $client->request("/repos/$owner/$repo/forks", 'POST', $data, 202, 'GitHubRepo');
 }
 
@@ -56,7 +62,7 @@ function drupdate_fork($owner, $repo) {
  *  The branch to be cloned
  */
 function _drupdate_clone($owner, $repo, $branch) {
-  global $client;
+  $client = _drupdate_github();
   $cmd = 'git clone git@github.com:'.$owner.'/'.$repo.' '.REPOSITORY_DIR;
   exec($cmd, $output, $return);
   if ($return == 0) {
@@ -165,7 +171,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
 }
 
 function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
-  global $client;
+  $client = _drupdate_github();
   // Step 5: commit the changes in an update branch
   $date = date('Y-m-d');
   $cmd = 'cd '.REPOSITORY_DIR.'; git checkout -b update-' . $date . '; git add --all .; git commit -am "Updated ' . $modules.'"';

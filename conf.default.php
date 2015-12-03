@@ -5,8 +5,9 @@
  * Copy this file to conf.php and enter your configuration details
  */
 
-$conf['username'] = 'github-username'; // Your github username
-$conf['password'] = 'github-password'; // Your github password
+define('DRUPATE_GITHUB_USER', 'github-username'); // Your github username
+define('DRUPATE_GITHUB_PASSWORD', 'github-password'); // Your github password
+
 $conf['owner'] = 'owner'; // The github owner of the repository where your Drupal code is located (the repository URL on github is https://github.com/owner/repo)
 $conf['repo'] = 'repo'; // The name of the repository where your Drupal code is located (the repository URL on github is https://github.com/owner/repo)
 $conf['branch'] = 'master'; // The branch that needs to be cloned
