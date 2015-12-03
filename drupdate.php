@@ -1,11 +1,33 @@
 <?php
 
 require_once(__DIR__ . '/conf.php');
-require_once(__DIR__ . '/lib.php');
 require_once(__DIR__ . '/vendor/autoload.php');
+
+// Make sure we are not running within a drupal environment
+if (!function_exists('t')) {
+  require_once(__DIR__ . '/lib.php');
+}
 
 define('REPOSITORY_DIR', 'repository');
 define('CORE_DIR', 'core');
+
+/**
+ * Recursively deletes a directory
+ * Taken from http://php.net/manual/en/function.rmdir.php
+ */
+function rrmdir($dir) {
+  if (is_dir($dir)) {
+    $objects = scandir($dir);
+    foreach ($objects as $object) {
+      if ($object != "." && $object != "..") {
+        if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object); else unlink($dir."/".$object);
+      }
+    }
+    reset($objects);
+    rmdir($dir);
+  }
+}
+
 
 $client = new GitHubClient();
 $client->setCredentials($conf['username'], $conf['password']);
