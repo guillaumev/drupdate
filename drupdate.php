@@ -1,7 +1,7 @@
 <?php
 
-require_once('./conf.php');
-require_once('./lib.php');
+require_once(__DIR__ . '/conf.php');
+require_once(__DIR__ . '/lib.php');
 require_once(__DIR__ . '/vendor/autoload.php');
 
 define('REPOSITORY_DIR', 'repository');
