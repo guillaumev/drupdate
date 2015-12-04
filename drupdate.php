@@ -4,7 +4,7 @@ require_once(__DIR__ . '/conf.php');
 require_once(__DIR__ . '/vendor/autoload.php');
 
 // Make sure we are not running within a drupal environment
-if (!function_exists('t')) {
+if (!defined('DRUPAL_ROOT')) {
   require_once(__DIR__ . '/lib.php');
 }
 
@@ -213,38 +213,39 @@ function drupdate_usage() {
   echo "-m: try to merge pull request automatically\n";
 }
 
-// Build conf
-$short_opts = 'o:r:b:i:m';
-$long_opts = array(
-  'owner:',
-  'repository:',
-  'branch:',
-  'ignore:',
-  'merge'
-);
-$options = getopt($short_opts, $long_opts);
+if (!defined('DRUPAL_ROOT')) {
+  // Build conf
+  $short_opts = 'o:r:b:i:m';
+  $long_opts = array(
+    'owner:',
+    'repository:',
+    'branch:',
+    'ignore:',
+    'merge'
+  );
+  $options = getopt($short_opts, $long_opts);
 
-if ((!isset($options['o']) && !isset($options['owner'])) ||
-  (!isset($options['r']) && !isset($options['repository'])) ||
-  (!isset($options['b']) && !isset($options['branch']) )) {
-  drupdate_usage();
+  if ((!isset($options['o']) && !isset($options['owner'])) ||
+    (!isset($options['r']) && !isset($options['repository'])) ||
+    (!isset($options['b']) && !isset($options['branch']) )) {
+    drupdate_usage();
+  }
+  else {
+    $owner = $options['o'] ? $options['o'] : $options['owner'];
+    $repository = $options['r'] ? $options['r'] : $options['repository'];
+    $branch = $options['b'] ? $options['b'] : $options['branch'];
+    $doptions = array();
+    if (isset($options['i'])) {
+      $doptions['ignore'] = explode(',', $options['i']);
+    }
+    if (isset($options['ignore'])) {
+      $doptions['ignore'] = explode(',', $options['ignore']);
+    }
+    $doptions['merge'] = false;
+    if (isset($options['m']) || isset($options['merge'])) {
+      $doptions['merge'] = true;
+    }
+    drupdate($owner, $repository, $branch, $doptions);
+  }
 }
-else {
-  $owner = $options['o'] ? $options['o'] : $options['owner'];
-  $repository = $options['r'] ? $options['r'] : $options['repository'];
-  $branch = $options['b'] ? $options['b'] : $options['branch'];
-  $doptions = array();
-  if (isset($options['i'])) {
-    $doptions['ignore'] = explode(',', $options['i']);
-  }
-  if (isset($options['ignore'])) {
-    $doptions['ignore'] = explode(',', $options['ignore']);
-  }
-  $doptions['merge'] = false;
-  if (isset($options['m']) || isset($options['merge'])) {
-    $doptions['merge'] = true;
-  }
-  drupdate($owner, $repository, $branch, $doptions);
-}
-
 
