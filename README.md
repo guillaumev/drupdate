@@ -13,3 +13,7 @@ Drupdate will allow you to automatically perform module and core updates of your
 You can now run drupdate from the command line, using `php drupdate.php`. When you run it, it will clone the repository into a "repository" directory in the current directory, perform the module updates, and send the updates (if there are some) to a branch in your repository called "update-[current_date]". The updates should then be ready to be merged into your main branch.
 
 Optionally, you can set drupdate to run periodically, by editing your crontab, so that you don't miss updates anymore.
+
+## Running automatically
+
+You can also use [Drupdate.me] (http://drupdate.me) to run this script automatically on your github repository.
