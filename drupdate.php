@@ -137,7 +137,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
           unset($to_update[$dkey]);
           // Update drupal core
           // Download in another folder
-          $cmd = 'drush dl drupal -y --destination='.CORE_DIR.' --drupal-project-rename';
+          $cmd = 'drush dl drupal-7 -y --destination='.CORE_DIR.' --drupal-project-rename';
           exec($cmd, $output, $return);
           if ($return == 0) {
             $cmd = 'cp -R '.CORE_DIR.'/drupal/* '.REPOSITORY_DIR;
