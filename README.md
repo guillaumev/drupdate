@@ -16,4 +16,4 @@ Optionally, you can set drupdate to run periodically, by editing your crontab, s
 
 ## Running automatically
 
-You can also use [Drupdate.me] (http://drupdate.me) to run this script automatically on your github repository.
+You can also use [Drupdate.gvj.ch] (http://drupdate.gvj.ch) to run this script automatically on your github repository.
