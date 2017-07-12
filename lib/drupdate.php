@@ -63,7 +63,7 @@ function drupdate_fork($owner, $repo) {
  */
 function _drupdate_clone($owner, $repo, $branch) {
   $client = _drupdate_github();
-  $cmd = 'git clone git@github.com:'.$owner.'/'.$repo.' '.REPOSITORY_DIR;
+  $cmd = 'git clone https://'.DRUPDATE_GITHUB_USER.':'.DRUPDATE_GITHUB_PASSWORD.'@github.com/'.$owner.'/'.$repo.' '.REPOSITORY_DIR;
   exec($cmd, $output, $return);
   if ($return == 0) {
     // Find out if it's a fork
@@ -73,6 +73,7 @@ function _drupdate_clone($owner, $repo, $branch) {
       // Get parent repository clone url
       $parent = $repo_object->getParent();
       $cmd = 'cd repository;git remote add upstream '.$parent->getCloneUrl().';git fetch upstream; git checkout '.$branch.';git merge upstream/'.$branch;
+      echo $cmd;
       exec($cmd, $output, $return);
     }
   }
@@ -117,6 +118,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
       // See if there is an update available
       $update_fetch_url = isset($project['info']['project status url']) ? $project['info']['project status url'] : UPDATE_DEFAULT_URL;
       $update_fetch_url .= '/'.$name.'/7.x';
+      echo $update_fetch_url;
       $xml = file_get_contents($update_fetch_url);
       if ($xml) {
         $available = update_parse_xml($xml);
