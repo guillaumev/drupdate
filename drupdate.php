@@ -121,8 +121,23 @@ function drupdate($owner, $repo, $branch, $options = array()) {
       if ($xml) {
         $available = update_parse_xml($xml);
         update_calculate_project_update_status(NULL, $project, $available);
-        if (isset($project['existing_version']) && isset($project['recommended']) && $project['existing_version'] != $project['recommended'] && (!isset($options['ignore']) || (isset($options['ignore']) && !in_array($name, $options['ignore'])))) {
-          $to_update[] = $name;
+        $recommended = $project['recommended'];
+        if ($options['security']) {
+          if (count($project['security updates'])) {
+            $shifted = array_shift($project['security updates']);
+            $recommended = $shifted['version'];
+          }
+        }
+        if (isset($project['existing_version']) &&
+          !empty($recommended) &&
+          $project['existing_version'] != $recommended &&
+          (!isset($options['ignore']) || (isset($options['ignore']) && !in_array($name, $options['ignore'])))) {
+          if ($name != 'drupal') {
+            $to_update[] = $name . '-' . $recommended;
+          }
+          else {
+            $to_update[] = $name;
+          }
         }
       }
     }
@@ -205,23 +220,25 @@ function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
 }
 
 function drupdate_usage() {
-  echo "Usage: drupdate -o owner -r repository -b branch -i modules_to_ignore -m\n";
+  echo "Usage: drupdate -o owner -r repository -b branch -i modules_to_ignore -m -s\n";
   echo "-o: github owner\n";
   echo "-r: github repository name\n";
   echo "-b: repository branch to use\n";
   echo "-i: list of modules to ignore\n";
   echo "-m: try to merge pull request automatically\n";
+  echo "-s: security updates only\n";
 }
 
 if (!defined('DRUPAL_ROOT')) {
   // Build conf
-  $short_opts = 'o:r:b:i:m';
+  $short_opts = 'o:r:b:i:m:s';
   $long_opts = array(
     'owner:',
     'repository:',
     'branch:',
     'ignore:',
-    'merge'
+    'merge',
+    'security'
   );
   $options = getopt($short_opts, $long_opts);
 
@@ -245,7 +262,10 @@ if (!defined('DRUPAL_ROOT')) {
     if (isset($options['m']) || isset($options['merge'])) {
       $doptions['merge'] = true;
     }
+    $doptions['security'] = false;
+    if (isset($options['s']) || isset($options['security'])) {
+      $doptions['security'] = true;
+    }
     drupdate($owner, $repository, $branch, $doptions);
   }
 }
-
