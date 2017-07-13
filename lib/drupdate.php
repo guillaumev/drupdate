@@ -142,6 +142,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
 
     // Step 4: download updated modules with drush
     if (!empty($to_update)) {
+      $core_update = FALSE;
       // TODO: handle patches
       // Handle drupal core specifically
       if (in_array('drupal', $to_update)) {
@@ -155,6 +156,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
           if ($return == 0) {
             $cmd = 'cp -R '.CORE_DIR.'/drupal/* '.REPOSITORY_DIR;
             exec($cmd, $output, $return);
+            $core_update = TRUE;
           }
         }
       }
@@ -166,6 +168,9 @@ function drupdate($owner, $repo, $branch, $options = array()) {
         $cmd = 'cd '.REPOSITORY_DIR.'; drush -y dl '.$modules;
         exec($cmd, $output, $return);
         if ($return == 0) {
+          if ($core_update) {
+            $modules .= ' drupal-' . $recommended_versions['drupal'];
+          }
           _drupdate_commit($owner, $repo, $branch, $modules, $options);
         }
       }
