@@ -210,7 +210,12 @@ function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
       $pr_data['head'] = $owner.':update-'.$date;
     }
     $pr_data['base'] = $branch;
-    $pr_data['body'] = 'Updated '.$modules;
+    $pr_data['body'] = "Updated the following: \n\n";
+    $arr_modules = explode(' ', $modules);
+    foreach ($arr_modules as $module) {
+      $arr_module = explode('-', $module);
+      $pr_data['body'] .= " * [" . $arr_module[0] . "](https://www.drupal.org/project/" . $arr_module[0] . "/releases/" . $arr_module[1] . ")\n";
+    }
     $client->pulls->createPullRequest($pr_data['owner'], $pr_data['repo'], $pr_data['title'], $pr_data['head'], $pr_data['base'], $pr_data['body']);
     if ($return == 0 && isset($options['merge']) && $options['merge'] == true) {
       // Merge the update branch back into the main one
