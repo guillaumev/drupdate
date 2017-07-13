@@ -215,8 +215,8 @@ function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
     foreach ($arr_modules as $module) {
       $pos = strpos($module, '-');
       $module_name = substr($module, 0, $pos);
-      $module_version = substr($module, $pos);
-      $pr_data['body'] .= " * [" . $arr_module[0] . "](https://www.drupal.org/project/" . $module_name . "/releases/" . $module_version . ")\n";
+      $module_version = substr($module, $pos + 1);
+      $pr_data['body'] .= " * [" . $module_name . "](https://www.drupal.org/project/" . $module_name . "/releases/" . $module_version . ")\n";
     }
     $client->pulls->createPullRequest($pr_data['owner'], $pr_data['repo'], $pr_data['title'], $pr_data['head'], $pr_data['base'], $pr_data['body']);
     if ($return == 0 && isset($options['merge']) && $options['merge'] == true) {
