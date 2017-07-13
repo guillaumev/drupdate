@@ -95,6 +95,7 @@ function _drupdate_clone($owner, $repo, $branch) {
  */
 function drupdate($owner, $repo, $branch, $options = array()) {
   $to_update = array();
+  $recommended_versions = array();
   // Step 1: clone repository
   $return = _drupdate_clone($owner, $repo, $branch);
   if ($return == 0) {
@@ -118,7 +119,6 @@ function drupdate($owner, $repo, $branch, $options = array()) {
       // See if there is an update available
       $update_fetch_url = isset($project['info']['project status url']) ? $project['info']['project status url'] : UPDATE_DEFAULT_URL;
       $update_fetch_url .= '/'.$name.'/7.x';
-      echo $update_fetch_url;
       $xml = file_get_contents($update_fetch_url);
       if ($xml) {
         $available = update_parse_xml($xml);
@@ -134,12 +134,8 @@ function drupdate($owner, $repo, $branch, $options = array()) {
           !empty($recommended) &&
           $project['existing_version'] != $recommended &&
           (!isset($options['ignore']) || (isset($options['ignore']) && !in_array($name, $options['ignore'])))) {
-          if ($name != 'drupal') {
-            $to_update[] = $name . '-' . $recommended;
-          }
-          else {
             $to_update[] = $name;
-          }
+            $recommended_versions[$name] = $recommended;
         }
       }
     }
@@ -154,7 +150,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
           unset($to_update[$dkey]);
           // Update drupal core
           // Download in another folder
-          $cmd = 'drush dl drupal-7 -y --destination='.CORE_DIR.' --drupal-project-rename';
+          $cmd = 'drush dl drupal-' . $recommended_versions['drupal'] . ' -y --destination='.CORE_DIR.' --drupal-project-rename';
           exec($cmd, $output, $return);
           if ($return == 0) {
             $cmd = 'cp -R '.CORE_DIR.'/drupal/* '.REPOSITORY_DIR;
@@ -163,6 +159,9 @@ function drupdate($owner, $repo, $branch, $options = array()) {
         }
       }
       if (!empty($to_update)) {
+        foreach ($to_update as &$name) {
+          $name = $name . '-' . $recommended_versions[$name];
+        }
         $modules = implode(' ', $to_update);
         $cmd = 'cd '.REPOSITORY_DIR.'; drush -y dl '.$modules;
         exec($cmd, $output, $return);
@@ -172,7 +171,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
       }
       else {
         // We are just updating drupal core
-        $modules = 'drupal';
+        $modules = 'drupal-' . $recommended_versions['drupal'];
         _drupdate_commit($owner, $repo, $branch, $modules, $options);
       }
     }
