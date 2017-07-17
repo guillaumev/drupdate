@@ -7,6 +7,9 @@ if (!empty($_GET) && $_GET['owner'] && $_GET['repository'] && $_GET['branch']) {
   if ($_GET['security']) {
     $command .= ' -s';
   }
+  if ($_GET['directory']) {
+    $command .= ' -d ' . escapeshellarg($_GET['directory']);
+  }
   exec($command, $output);
   echo join("\n", $output);
 }

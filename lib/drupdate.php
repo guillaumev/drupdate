@@ -94,6 +94,10 @@ function _drupdate_clone($owner, $repo, $branch) {
  *    - ignore: array of modules or themes that should be ignored in the update
  */
 function drupdate($owner, $repo, $branch, $options = array()) {
+  $drupal_directory = REPOSITORY_DIR;
+  if (isset($options['directory'])) {
+    $drupal_directory = REPOSITORY_DIR . "/" . $options['directory'];
+  }
   $to_update = array();
   $recommended_versions = array();
   // Step 1: clone repository
@@ -154,7 +158,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
           $cmd = 'drush dl drupal-' . $recommended_versions['drupal'] . ' -y --destination='.CORE_DIR.' --drupal-project-rename';
           exec($cmd, $output, $return);
           if ($return == 0) {
-            $cmd = 'cp -R '.CORE_DIR.'/drupal/* '.REPOSITORY_DIR;
+            $cmd = 'cp -R ' . CORE_DIR . '/drupal/* ' . $drupal_directory;
             exec($cmd, $output, $return);
             $core_update = TRUE;
           }
@@ -165,7 +169,7 @@ function drupdate($owner, $repo, $branch, $options = array()) {
           $name = $name . '-' . $recommended_versions[$name];
         }
         $modules = implode(' ', $to_update);
-        $cmd = 'cd '.REPOSITORY_DIR.'; drush -y dl '.$modules;
+        $cmd = 'cd ' . $drupal_directory . '; drush -y dl ' . $modules;
         exec($cmd, $output, $return);
         if ($return == 0) {
           if ($core_update) {
@@ -233,25 +237,27 @@ function _drupdate_commit($owner, $repo, $branch, $modules, $options) {
 }
 
 function drupdate_usage() {
-  echo "Usage: drupdate -o owner -r repository -b branch -i modules_to_ignore -m -s\n";
+  echo "Usage: drupdate -o owner -r repository -b branch -i modules_to_ignore -m -s -d directory\n";
   echo "-o: github owner\n";
   echo "-r: github repository name\n";
   echo "-b: repository branch to use\n";
   echo "-i: list of modules to ignore\n";
   echo "-m: try to merge pull request automatically\n";
   echo "-s: security updates only\n";
+  echo "-d: directory where to find the drupal site\n"
 }
 
 if (!defined('DRUPAL_ROOT')) {
   // Build conf
-  $short_opts = 'o:r:b:i:m:s';
+  $short_opts = 'o:r:b:i:m:s:d';
   $long_opts = array(
     'owner:',
     'repository:',
     'branch:',
     'ignore:',
     'merge',
-    'security'
+    'security',
+    'directory'
   );
   $options = getopt($short_opts, $long_opts);
 
@@ -278,6 +284,9 @@ if (!defined('DRUPAL_ROOT')) {
     $doptions['security'] = false;
     if (isset($options['s']) || isset($options['security'])) {
       $doptions['security'] = true;
+    }
+    if (isset($options['d'])) {
+      $doptions['directory'] = $options['d'];
     }
     drupdate($owner, $repository, $branch, $doptions);
   }
