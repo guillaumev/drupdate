@@ -244,7 +244,7 @@ function drupdate_usage() {
   echo "-i: list of modules to ignore\n";
   echo "-m: try to merge pull request automatically\n";
   echo "-s: security updates only\n";
-  echo "-d: directory where to find the drupal site\n"
+  echo "-d: directory where to find the drupal site\n";
 }
 
 if (!defined('DRUPAL_ROOT')) {
