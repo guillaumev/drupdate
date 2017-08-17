@@ -48,6 +48,7 @@ function _drupdate_github() {
  */
 function drupdate_fork($owner, $repo) {
   $client = _drupdate_github();
+  $data = array();
   return $client->request("/repos/$owner/$repo/forks", 'POST', $data, 202, 'GitHubRepo');
 }
 
