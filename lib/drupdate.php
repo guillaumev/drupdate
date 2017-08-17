@@ -72,8 +72,7 @@ function _drupdate_clone($owner, $repo, $branch) {
       // This is a fork, it needs to be synchronized
       // Get parent repository clone url
       $parent = $repo_object->getParent();
-      $cmd = 'cd repository;git remote add upstream '.$parent->getCloneUrl().';git fetch upstream; git checkout '.$branch.';git merge upstream/'.$branch;
-      echo $cmd;
+      $cmd = 'cd repository;git remote add upstream ' . str_replace('https://github.com', 'https://' . DRUPDATE_GITHUB_USER . ':' . DRUPDATE_GITHUB_PASSWORD . '@github.com', $parent->getCloneUrl()) . ';git fetch upstream; git checkout '.$branch.';git merge upstream/'.$branch;
       exec($cmd, $output, $return);
     }
   }
