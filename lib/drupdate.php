@@ -1,7 +1,7 @@
 <?php
 
-require_once(__DIR__ . '/../conf.php');
-require_once(__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__ . '/conf.php');
+require_once(__DIR__ . '/vendor/autoload.php');
 
 // Make sure we are not running within a drupal environment
 if (!defined('DRUPAL_ROOT')) {
