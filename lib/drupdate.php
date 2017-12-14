@@ -128,10 +128,14 @@ function drupdate($owner, $repo, $branch, $options = array()) {
         $available = update_parse_xml($xml);
         update_calculate_project_update_status(NULL, $project, $available);
         $recommended = $project['recommended'];
-        if ($options['security']) {
+        if (!empty($options['security'])) {
           if (count($project['security updates'])) {
             $shifted = array_shift($project['security updates']);
             $recommended = $shifted['version'];
+          }
+          else {
+            // Stay at the current version
+            $recommended = $project['existing_version'];
           }
         }
         if (isset($project['existing_version']) &&
@@ -249,7 +253,7 @@ function drupdate_usage() {
 
 if (!defined('DRUPAL_ROOT')) {
   // Build conf
-  $short_opts = 'o:r:b:i:m:s:d';
+  $short_opts = 'o:r:b:imsd';
   $long_opts = array(
     'owner:',
     'repository:',
